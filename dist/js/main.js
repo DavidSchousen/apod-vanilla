@@ -10597,80 +10597,83 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
+//https://github.com/microtrain1903/nasa/
+//replace ajax getRequest to Vanilla js, buildDOM $'s
+//jquery/ajax to Vanilla JS
+//xhr pull requests
+//readware for this in slack
+//Vanilla JS
 var apod = {
-  //Create a random date
 
   randomDate: function(start, end) {
-    //Randomize the date https://gist.github.com/miguelmota/5b67e03845d840c949c4
-    let date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    let date = new Date(
+      start.getTime() + Math.random() *
+        (end.getTime() - start.getTime())
+    );
 
-    //Format the date
     let d = date.getDate();
     let m = date.getMonth() + 1; //In JS months start at 0
     let y = date.getFullYear();
 
-    //Change the maonth and day strings so that they match the documented format.
     if(m < 10){
       m = '0'+m
     }
 
     if(d < 10){
-      m = '0'+d
+      d = '0'+d
     }
 
     return `${y}-${m}-${d}`;
   },
 
-  // Application Constructor
-  init: function() {
-      let date = this.randomDate(new Date(1995, 5, 16), new Date());
-      //let date = "2013-06-06"; //star comparison video
-      var url = "https://api.nasa.gov/planetary/apod?api_key=TcfsE4U6nSnrOVtBcto9CSs3g1dvgXeuzNFgC7pj&date=" + date;
-      $.ajax({
-        url: url
-    }).done(function(result){
-      
-      if(result.media_type === 'video') {
-        $("#apodImg").hide();
-        $("#apodVideo > iframe").attr("src", result.url).show();
-      }else{
-        $("#apodVideo").hide();
-        $("#apodImg").attr("src", result.url).attr('alt', result.title).show();
-      }
-      
-      $("#apodTitle").text(result.title);
-      $("#apodImg").attr("src", result.url);
-      $("#apodCopyright").text("Copyright: " + result.copyright);
-      $("#apodDate").text("Date: " + date);
-      $("#apodDesc").text(result.explanation);
-    }).fail(function(data){
-      console.log(data);
-    });
-  },
+buildDOM: function(result) {
+document.querySelector('#apodTitle').innerHTML = result.title;
+
+if(result.media_type === 'video') {
+  document.querySelector('#apodImg').style.display ='none';
+  let avi = document.querySelector('#apodVideo > iframe');
+  avi.src=result.url;
+  document.querySelector('#apodVideo').style.display='block';
+}else{
+  document.querySelector('#apodVideo').style.display ='none';
+  let ai = document.querySelector('#apodImg');
+  ai.src=result.url;
+  ai.style.display='block';
+}
+
+if(result.copyright!=undefined) {
+  document.querySelector('#apodCopyright').innerHTML ='Copyright: ' + result.copyright;
+}
+  document.querySelector("#apodDate").innerHTML = 'Date: ' + result.date;
+  document.querySelector("#apodDesc").innerHTML = result.explanation;
+},
+
+//Executes an XHR call to an API.
+getRequest: function() {
+  let _this = this;
+  let date = this.randomDate(new Date(1995, 5, 16), new Date());
+let url = "https://api.nasa.gov/planetary/apod?api_key=TcfsE4U6nSnrOVtBcto9CSs3g1dvgXeuzNFgC7pj&date=" + date;
+
+var xhr = new XMLHttpRequest();
+xhr.open('GET',url);
+xhr.send();
+
+xhr.onload = function(){
+  let result = JSON.parse(xhr.response);
+  _this.buildDOM(result);
+  }
+},
+
+// Initialization method.
+init: function() {
+  this.getRequest();
+},
+
 };
-//END OF APOD FUNC
 
-<<<<<<< HEAD
-apod.init();
-=======
 apod.init();
 
-/*document.getElementById('changeColor').addEventListener('click', 
-function(){
-  var randomColor = "";
-
-  //document.getElementById("changeColor").value 
-  //  = Math.floor(Math.random()*16777215).toString(16);
-  document.getElementById("button").style.background='#000000';
-  randomColor = Math.floor(Math.random()*16777215).toString(16);
-  
-  return randomColor;
-});//*/
-
-/* https://learn.jquery.com/using-jquery-core/document-ready/ */
-$(function() {
-    $('.button').on('click',function(){
-      apod.getRequest();
-    });
+// Click method.
+document.querySelector('#changeColor').addEventListener('click',function(){
+  apod.getRequest();
 });
->>>>>>> a27d80b... Correct push.
